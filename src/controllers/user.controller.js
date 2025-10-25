@@ -144,8 +144,8 @@ const logoutUser = asyncHandler( async(req,res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set: {
-                refreshToken: undefined
+            $unset: {
+                refreshToken: 1
             }
         },
         {
@@ -262,7 +262,7 @@ const updateAccountDetails = asyncHandler(async(req,res)=> {
 
 
 const updateAvatar = asyncHandler(async(req,res)=> {
-    const avatarLocalPath = req.files?.path
+    const avatarLocalPath = req.file?.path
     if(!avatarLocalPath){
         throw new ApiError(400, "Avatar file is missing")
     }
@@ -293,7 +293,7 @@ const updateAvatar = asyncHandler(async(req,res)=> {
 
 
 const updateUserCoverImage = asyncHandler(async(req,res)=> {
-    const coverImageLocalPath = req.files?.path
+    const coverImageLocalPath = req.file?.path
     if(!coverImageLocalPath){
         throw new ApiError(400, "cover image file is missing")
     }
@@ -354,14 +354,14 @@ const getUserChannelProfile = asyncHandler(async(req,res) => {
         {
             $addFields: {
                 subscribersCount: {
-                    $size: "$subscribers"
+                    $size: "$subscriber"
                 },
                 channelsSubscribedToCount: {
                     $size: "$subscribedTo"
                 },
                 isSubscribed: {
                     $cond: {
-                        if: {$in: [req.user?._id, "$subscribers.subscriber"]},
+                        if: {$in: [new mongoose.Types.ObjectId(req.user?._id), "$subscriber.subscriber"]},
                         then: true,
                         else: false,
                     }
